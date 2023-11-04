@@ -1,10 +1,18 @@
 #include "DHT.h"
+#include <MQUnifiedsensor.h>
 
 // Temperature definitions
 #define DHTPIN 4     // Digital pin connected to the DHT sensor
 #define DHTTYPE DHT11 
 
 DHT dht(DHTPIN, DHTTYPE);
+
+float h, t, hic;
+
+// MQ 135
+#define MQPIN 34
+
+int ppm;
 
 void setup() {
   // put your setup code here, to run once:
@@ -18,14 +26,17 @@ void setup() {
 void loop(){
   delay(500);
 
-  float h = readHumidity();
-  float t = readTemperature();
-  float hic = heatIndex(t, h);
+  h = readHumidity();
+  t = readTemperature();
+  hic = heatIndex(t, h);
 
   if (isnan(h) || isnan(t)) {
     Serial.println(F("Failed to read from DHT sensor!"));
-    //return;
   }
+
+  ppm = analogRead(MQPIN);
+  Serial.println(F("PPM: "));
+  Serial.println(ppm);
 }
 
 float readTemperature() {
