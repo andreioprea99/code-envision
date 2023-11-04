@@ -1,5 +1,4 @@
 #include "DHT.h"
-#include <MQUnifiedsensor.h>
 
 // Temperature definitions
 #define DHTPIN 4     // Digital pin connected to the DHT sensor
@@ -17,8 +16,6 @@ int ppm;
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(9600);
-
-  Serial.println(F("DHTxx test!"));
 
   dht.begin();
 }
