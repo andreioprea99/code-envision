@@ -15,10 +15,7 @@ void setup() {
   dht.begin();
 }
 
-void loop() {
-  // put your main code here, to run repeatedly:
-  Serial.println("Hello World!");
-  delay(500);
+void loop(){
    
   float h = readHumidity();
   float t = readTemperature();
@@ -37,7 +34,7 @@ float readTemperature() {
   Serial.print(t);
   Serial.print(F("°C "));
 
-  return t
+  return t;
 }
 
 float readHumidity() {
@@ -46,14 +43,16 @@ float readHumidity() {
   Serial.print(F("Humidity: "));
   Serial.print(h);
 
-  return h
+  return h;
 }
 
 float heatIndex(float temp, float humidity) {
+  float t = dht.readTemperature();
+  float h = dht.readHumidity();
   float hic = dht.computeHeatIndex(t, h, false);
 
   Serial.print(F("°F  Heat index: "));
   Serial.print(hic);
 
-  return hic
+  return hic;
 }
