@@ -1,7 +1,12 @@
+#include <WiFiClientSecure.h>
 #include <WiFi.h>
 #include <HTTPClient.h>
+#include <WiFiClientSecure.h>
 const char* ssid = "POCO F3";
 const char* password = "52b18ccf75fb";
+const char*  server = "https://eoj0gk8moqioxza.m.pipedream.net";
+
+WiFiClientSecure client;
 
 #include "DHT.h"
 
@@ -31,6 +36,11 @@ unsigned long sampletime_ms = 30000;
 unsigned long lowpulseoccupancyPM1 = 0;
 unsigned long lowpulseoccupancyPM25 = 0;
 
+float conPM1;
+float conPM25;
+
+// boar info
+
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(9600);
@@ -38,6 +48,7 @@ void setup() {
   dht.begin();
   setupDSM();
   setupwifi();
+  client.setInsecure();
 }
 
 void setupDSM() {
@@ -60,6 +71,7 @@ void loop(){
   Serial.println(ppm);
 
   readDSM();
+  setupclient();
 }
 
 float calculateConcentration(long lowpulseInMicroSeconds, long durationinSeconds){
@@ -104,8 +116,8 @@ void readDSM(){
     
     concentration = 0.001915 * pow(ratio1,2) + 0.09522 * ratio1 - 0.04884;//Calculate the mg/m3
     */
-    float conPM1 = calculateConcentration(lowpulseoccupancyPM1,30);
-    float conPM25 = calculateConcentration(lowpulseoccupancyPM25,30);
+    conPM1 = calculateConcentration(lowpulseoccupancyPM1,30);
+    conPM25 = calculateConcentration(lowpulseoccupancyPM25,30);
     Serial.print("PM1 ");
     Serial.print(conPM1);
     Serial.print("  PM25 ");
@@ -155,3 +167,20 @@ void setupwifi(){
   Serial.println("Connected to WiFi network with IP Address: ");
   Serial.println(WiFi.localIP());
 }
+
+void setupclient(){
+  WiFiClientSecure *client = new WiFiClientSecure;
+  if(client) {
+    // set secure client without certificate
+    client->setInsecure();
+    //create an HTTPClient instance
+    HTTPClient https;
+    https.begin(*client, server);
+    https.addHeader("Content-Type", "application/json");
+    char body[1024];
+    sprintf(body, "{\"temperature\":\"%f\", \"hummidity\":\"%f\", \"ppm\":\"%d\", \"ppm_25\":\"%f\", \"ppm_1\":\"%f\", \"sensor_id\":\"%s\"}", t, h, ppm, conPM25, conPM1, String("foo"));
+
+    Serial.println(body);
+    int httpResponseCode = https.POST(String(body));    
+  }
+}    
