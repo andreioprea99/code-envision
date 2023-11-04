@@ -51,6 +51,19 @@ void loop(){
   Serial.println(ppm);
 }
 
+float calculateConcentration(long lowpulseInMicroSeconds, long durationinSeconds){
+  
+  float ratio = (lowpulseInMicroSeconds/1000000.0)/30.0*100.0; //Calculate the ratio
+  float concentration = 0.001915 * pow(ratio,2) + 0.09522 * ratio - 0.04884;//Calculate the mg/m3
+  Serial.print("lowpulseoccupancy:");
+  Serial.print(lowpulseInMicroSeconds);
+  Serial.print("    ratio:");
+  Serial.print(ratio);
+  Serial.print("    Concentration:");
+  Serial.println(concentration);
+  return concentration;
+}
+
 void readDSM(){
   durationPM1 = pulseIn(PM1PIN, LOW);
   durationPM25 = pulseIn(PM25PIN, LOW);
