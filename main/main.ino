@@ -1,3 +1,8 @@
+#include <WiFi.h>
+#include <HTTPClient.h>
+const char* ssid = "POCO F3";
+const char* password = "52b18ccf75fb";
+
 #include "DHT.h"
 
 #define SLEEP_TIME 30000 
@@ -32,6 +37,7 @@ void setup() {
 
   dht.begin();
   setupDSM();
+  setupwifi();
 }
 
 void setupDSM() {
@@ -134,4 +140,18 @@ float heatIndex(float temp, float humidity) {
   Serial.println(hic);
 
   return hic;
+}
+
+void setupwifi(){
+  
+  Serial.begin(9600); 
+  WiFi.begin(ssid, password);
+  Serial.println("Connecting");
+  while(WiFi.status() != WL_CONNECTED){
+    delay(500);
+    Serial.print(".");
+  }
+
+  Serial.println("Connected to WiFi network with IP Address: ");
+  Serial.println(WiFi.localIP());
 }
