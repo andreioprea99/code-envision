@@ -1,0 +1,31 @@
+label, input{
+  color:black;
+  margin-bottom:10px ;
+}
+.centerColItems{
+  display:flex;
+  justify-content:center;
+  align-items: center;
+}
+.AddProductImg{
+  width: 70%;
+  height: 70%;
+
+  align-self: center;
+  border: 10 solid red;
+} 
+.centerColRows{
+  padding:20px;
+  display: flex;
+  flex-direction: column;
+}
+h1{
+  color:black;
+  font-weight: 700;
+}
+input, input:focus, input:hover, input:active{
+  border-radius: 8px;
+  outline: none;
+  height: 40px;
+  padding-left: 10px;
+}

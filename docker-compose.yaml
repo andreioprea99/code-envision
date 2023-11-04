@@ -24,5 +24,14 @@ services:
     restart: always
     ports:
       - 8443:443
+
+  frontend:
+    image: frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - 80:3000
+
 networks:
   adapter_db_network: {} # adapter + influx
