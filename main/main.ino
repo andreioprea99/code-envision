@@ -1,5 +1,6 @@
 #include "DHT.h"
 
+#define SLEEP_TIME 30000 
 // Temperature definitions
 #define DHTPIN 4     // Digital pin connected to the DHT sensor
 #define DHTTYPE DHT11 
@@ -19,7 +20,7 @@ int ppm;
 
 unsigned long durationPM1;
 unsigned long durationPM25;
-unsigned long starttime;
+unsigned long elapsedtime;
 unsigned long endtime;
 unsigned long sampletime_ms = 30000;
 unsigned long lowpulseoccupancyPM1 = 0;
@@ -30,6 +31,7 @@ void setup() {
   Serial.begin(9600);
 
   dht.begin();
+  setupDSM();
 }
 
 void setupDSM() {
@@ -38,6 +40,7 @@ void setupDSM() {
 }
 
 void loop(){
+  
   h = readHumidity();
   t = readTemperature();
   hic = heatIndex(t, h);
@@ -49,6 +52,8 @@ void loop(){
   ppm = analogRead(MQPIN);
   Serial.println(F("PPM: "));
   Serial.println(ppm);
+
+  readDSM();
 }
 
 float calculateConcentration(long lowpulseInMicroSeconds, long durationinSeconds){
@@ -65,16 +70,28 @@ float calculateConcentration(long lowpulseInMicroSeconds, long durationinSeconds
 }
 
 void readDSM(){
-  durationPM1 = pulseIn(PM1PIN, LOW);
-  durationPM25 = pulseIn(PM25PIN, LOW);
+  elapsedtime = millis();
+  endtime = elapsedtime + sampletime_ms;
   
-  lowpulseoccupancyPM1 += durationPM1;
-  lowpulseoccupancyPM25 += durationPM25;
+  lowpulseoccupancyPM1 = 0;
+  lowpulseoccupancyPM25 = 0;
+
+  if (endtime < elapsedtime) {
+    Serial.println("missing");
+    return;
+  }
   
-  endtime = millis();
-  if ((endtime-starttime) > sampletime_ms) //Only after 30s has passed we calcualte the ratio
+  while (elapsedtime < endtime) //Only after 30s has passed we calcualte the ratio
   {
-    /*
+    durationPM1 = pulseIn(PM1PIN, LOW);
+    durationPM25 = pulseIn(PM25PIN, LOW);
+
+    lowpulseoccupancyPM1 += durationPM1;
+    lowpulseoccupancyPM25 += durationPM25;
+
+    elapsedtime = millis();    
+  }
+      /*
     ratio1 = (lowpulseoccupancy/1000000.0)/30.0*100.0; //Calculate the ratio
     Serial.print("ratio1: ");
     Serial.println(ratio1);
@@ -87,10 +104,6 @@ void readDSM(){
     Serial.print(conPM1);
     Serial.print("  PM25 ");
     Serial.println(conPM25);
-    lowpulseoccupancyPM1 = 0;
-    lowpulseoccupancyPM25 = 0;
-    starttime = millis();
-  } 
 }
 
 float readTemperature() {
