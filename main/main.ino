@@ -10,7 +10,7 @@ DHT dht(DHTPIN, DHTTYPE);
 float h, t, hic;
 
 // MQ 135
-#define MQPIN 13
+#define MQPIN 34
 
 int ppm;
 
@@ -35,8 +35,8 @@ void loop(){
   }
 
   ppm = analogRead(MQPIN);
-  Serial.Println(F("PPM: "));
-  Serial.Println(ppm);
+  Serial.println(F("PPM: "));
+  Serial.println(ppm);
 }
 
 float readTemperature() {
