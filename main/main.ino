@@ -1,6 +1,6 @@
 #include "DHT.h"
-#include <MQUnifiedsensor.h>
 
+#define SLEEP_TIME 30000 
 // Temperature definitions
 #define DHTPIN 4     // Digital pin connected to the DHT sensor
 #define DHTTYPE DHT11 
@@ -14,18 +14,33 @@ float h, t, hic;
 
 int ppm;
 
+// DSM
+#define PM1PIN 12
+#define PM25PIN 14
+
+unsigned long durationPM1;
+unsigned long durationPM25;
+unsigned long elapsedtime;
+unsigned long endtime;
+unsigned long sampletime_ms = 30000;
+unsigned long lowpulseoccupancyPM1 = 0;
+unsigned long lowpulseoccupancyPM25 = 0;
+
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(9600);
 
-  Serial.println(F("DHTxx test!"));
-
   dht.begin();
+  setupDSM();
+}
+
+void setupDSM() {
+  pinMode(PM1PIN,INPUT);
+  pinMode(PM25PIN,INPUT);
 }
 
 void loop(){
-  delay(500);
-
+  
   h = readHumidity();
   t = readTemperature();
   hic = heatIndex(t, h);
@@ -37,6 +52,58 @@ void loop(){
   ppm = analogRead(MQPIN);
   Serial.println(F("PPM: "));
   Serial.println(ppm);
+
+  readDSM();
+}
+
+float calculateConcentration(long lowpulseInMicroSeconds, long durationinSeconds){
+  
+  float ratio = (lowpulseInMicroSeconds/1000000.0)/30.0*100.0; //Calculate the ratio
+  float concentration = 0.001915 * pow(ratio,2) + 0.09522 * ratio - 0.04884;//Calculate the mg/m3
+  Serial.print("lowpulseoccupancy:");
+  Serial.print(lowpulseInMicroSeconds);
+  Serial.print("    ratio:");
+  Serial.print(ratio);
+  Serial.print("    Concentration:");
+  Serial.println(concentration);
+  return concentration;
+}
+
+void readDSM(){
+  elapsedtime = millis();
+  endtime = elapsedtime + sampletime_ms;
+  
+  lowpulseoccupancyPM1 = 0;
+  lowpulseoccupancyPM25 = 0;
+
+  if (endtime < elapsedtime) {
+    Serial.println("missing");
+    return;
+  }
+  
+  while (elapsedtime < endtime) //Only after 30s has passed we calcualte the ratio
+  {
+    durationPM1 = pulseIn(PM1PIN, LOW);
+    durationPM25 = pulseIn(PM25PIN, LOW);
+
+    lowpulseoccupancyPM1 += durationPM1;
+    lowpulseoccupancyPM25 += durationPM25;
+
+    elapsedtime = millis();    
+  }
+      /*
+    ratio1 = (lowpulseoccupancy/1000000.0)/30.0*100.0; //Calculate the ratio
+    Serial.print("ratio1: ");
+    Serial.println(ratio1);
+    
+    concentration = 0.001915 * pow(ratio1,2) + 0.09522 * ratio1 - 0.04884;//Calculate the mg/m3
+    */
+    float conPM1 = calculateConcentration(lowpulseoccupancyPM1,30);
+    float conPM25 = calculateConcentration(lowpulseoccupancyPM25,30);
+    Serial.print("PM1 ");
+    Serial.print(conPM1);
+    Serial.print("  PM25 ");
+    Serial.println(conPM25);
 }
 
 float readTemperature() {
