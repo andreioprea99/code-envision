@@ -25,7 +25,7 @@ import axios from './Utils/axios_main'
 import "./App.css"
 
 
-const center = { latitude: 44.434951972403574, longitude: 26.047760546207428 }
+const center = { latitude: 44.942252244435046, longitude: 26.01893741152837 }
 const libs = ['places', 'visualization'];
 
 function App() {
@@ -54,7 +54,8 @@ function App() {
       // )
 
       // setMarkers(response.data.locations);
-      setMarkers(markers.slice())
+      // setMarkers(markers.slice())
+      setMarkers(heatmapData)
     } catch (err) {
       console.log(err)
 
@@ -64,6 +65,25 @@ function App() {
     }
   }, []);
 
+  const heatmapData = [
+    { latitude: 44.94398456988681, longitude: 25.991712629305137 },
+    { latitude: 44.94398456988681, longitude: 25.991712629305137 },
+    { latitude: 44.94398456988681, longitude: 25.991712629305137 },
+    { latitude: 44.94398456988681, longitude: 25.991712629305137 },
+    { latitude: 44.94398456988681, longitude: 25.991712629305137 },
+
+    { latitude: 44.929100120492066, longitude: 26.010187384319053 },
+    { latitude: 44.929100120492066, longitude: 26.010187384319053 },
+    { latitude: 44.929100120492066, longitude: 26.010187384319053 },
+
+    { latitude: 44.95149758371722, longitude: 26.023150332757496 },
+    { latitude: 44.95149758371722, longitude: 26.023150332757496 },
+    { latitude: 44.95149758371722, longitude: 26.023150332757496 },
+    { latitude: 44.95149758371722, longitude: 26.023150332757496 },
+
+    { latitude: 44.95510925951168, longitude: 26.013963990485387 },
+  ]
+
   const handleMapclick = (e) => {
 
     setCurrentMarker({
@@ -71,6 +91,23 @@ function App() {
       longitude: e.latLng.lng()
     })
   }
+
+  const gradient = [
+    'rgba(16, 52, 166, 0)',
+    'rgba(65, 47, 136, 1)',
+    'rgba(255, 206, 3, 1)',
+    'rgba(253, 97,  4, 1)',
+    'rgba(211, 33, 45, 1)',
+    'rgba(246, 45, 45, 1)',
+    'rgba(240, 5, 5, 1)'
+    // 'rgba(0, 0, 191, 1)',
+    // 'rgba(0, 0, 159, 1)',
+    // 'rgba(0, 0, 127, 1)',
+    // 'rgba(63, 0, 91, 1)',
+    // 'rgba(127, 0, 63, 1)',
+    // 'rgba(191, 0, 31, 1)',
+    // 'rgba(255, 0, 0, 1)'
+  ]
 
   const addMarker = async () => {
     console.log(markers);
@@ -126,7 +163,8 @@ function App() {
               new window.google.maps.LatLng(marker.latitude, marker.longitude)
             ))}
             options={{
-              radius: 50
+              radius: 30,
+              gradient: gradient,
             }}
           >
           </HeatmapLayer>
@@ -136,7 +174,6 @@ function App() {
             return <Marker key={index} position={{ lat: marker.latitude, lng: marker.longitude }} onClick />
 
           })}
-
         </GoogleMap>
       </Box>
       <Box
