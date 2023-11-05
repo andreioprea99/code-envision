@@ -1,13 +1,17 @@
 version: '3'
 
 services:
-  influxdb:
-    image: influxdb:2.7.3
+  influxdb2:
+    image: influxdb:2.6-alpine
     volumes:
-      - ./volumes/influxdb:/var/lib/influxdb
-      - ./influx/influxdb.conf:/etc/influxdb/influxdb.conf:ro
+      - ./volumes/influxdb:/var/lib/influxdb2:rw
+      # - ./influx/influxdb.conf:/etc/influxdb/influxdb.conf:ro
     networks:
       - adapter_db_network
+    env_file:
+      - ./influx/influxdb.env
+    ports:
+      - "8086:8086"
 
   app:
     image: app
@@ -18,20 +22,20 @@ services:
       - INFLUXDB_DB=iot_data
       - DEBUG_DATA_FLOW=true
     depends_on:
-      - influxdb
+      - influxdb2
     networks:
       - adapter_db_network
     restart: always
     ports:
-      - 8443:443
+      - 8443:8443
 
-  frontend:
-    image: frontend
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    ports:
-      - 80:3000
+  # frontend:
+  #   image: frontend
+  #   build:
+  #     context: ./frontend
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - 80:3000
 
 networks:
   adapter_db_network: {} # adapter + influx
